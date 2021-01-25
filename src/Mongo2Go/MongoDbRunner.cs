@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using Mongo2Go.Helper;
+using MongoDB.Bson.Serialization;
 
 namespace Mongo2Go
 {
@@ -31,7 +32,7 @@ namespace Mongo2Go
         /// On dispose: kills them and deletes their data directory
         /// </summary>
         /// <remarks>Should be used for integration tests</remarks>
-        public static MongoDbRunner Start(string dataDirectory = null, string binariesSearchPatternOverride = null, string binariesSearchDirectory = null, bool singleNodeReplSet = false, string additionalMongodArguments = null, ushort singleNodeReplSetWaitTimeout = MongoDbDefaults.SingleNodeReplicaSetWaitTimeout)
+        public static MongoDbRunner Start(string dataDirectory = null, string binariesSearchPatternOverride = null, string binariesSearchDirectory = null, bool singleNodeReplSet = false, string additionalMongodArguments = null, ushort singleNodeReplSetWaitTimeout = MongoDbDefaults.SingleNodeReplicaSetWaitTimeout, int port = MongoDbDefaults.TestStartPort)
         {
             if (dataDirectory == null) {
                 dataDirectory = CreateTemporaryDataDirectory();
@@ -175,10 +176,12 @@ namespace Mongo2Go
         /// <summary>
         /// usage: integration tests
         /// </summary>
-        private MongoDbRunner(IPortPool portPool, IFileSystem fileSystem, IMongoDbProcessStarter processStarter, IMongoBinaryLocator mongoBin, string dataDirectory = null, bool singleNodeReplSet = false, string additionalMongodArguments = null, ushort singleNodeReplSetWaitTimeout = MongoDbDefaults.SingleNodeReplicaSetWaitTimeout)
+        private MongoDbRunner(IPortPool portPool, IFileSystem fileSystem, IMongoDbProcessStarter processStarter, IMongoBinaryLocator mongoBin, string dataDirectory = null, bool singleNodeReplSet = false, string additionalMongodArguments = null, ushort singleNodeReplSetWaitTimeout = MongoDbDefaults.SingleNodeReplicaSetWaitTimeout, int? portOverride = null)
         {
             _fileSystem = fileSystem;
-            _port = portPool.GetNextOpenPort();
+            
+            _port = portOverride ?? portPool.GetNextOpenPort();
+            
             _mongoBin = mongoBin;
 
             if (dataDirectory == null) {
